@@ -24,6 +24,7 @@ This repo provides code and automation required to setup a minimal alert managem
     - Oncall - Oncall calendar for teams
   - Two Lambda Functions and its IAM Role and Policy
     - IncidentProcessor - Accept the incident from API Gateway, process it, store to Incdient table and initiate step function
+    - IncidentNotifier - Invoked by the step function for sending email to oncall and escalation
   - One Step Function and its IAM Role and Policy
     - Used to send email alert to oncall engineer and alert the manager after 5 minutes
   - One HTTP API Gateway V2 and IAM policy
@@ -51,7 +52,15 @@ This repo provides code and automation required to setup a minimal alert managem
 
 ## Setup Instructions
 
-Checkout this repo and change to the root directory of the repo.  The repo is structured as follows:
+Checkout this repo and change to the root directory of the repo. Then switch to the 'chapter-3' directory 
+
+```
+git clone git@github.com:PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise.git
+cd chapter-3
+```
+
+The repo is structured as follows:
+
 ```
 .
 |-- cloudformation
@@ -73,7 +82,7 @@ Checkout this repo and change to the root directory of the repo.  The repo is st
 ```
 Let us go through each steps
 
-### Add three emailaddress to SES
+### Add three email addresses to SES
 
 - AWS Simple Email Service need to verify each email before using it to send out messages
 - For this you need to add these emails ( called identities in SES) to SES for verification
