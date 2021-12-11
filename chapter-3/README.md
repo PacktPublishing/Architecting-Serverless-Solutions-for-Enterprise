@@ -208,7 +208,7 @@ By now the first email alert will be received at oncall@inresponse.com and after
 Now let us try to acknowledge the incident to prevent escalation.  Try this within five minutes of the incident is created - to verify incident is not escalated and you dont receive any emails to escalation@inresponse.com
 
 ```
-curl -s{ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X POST -d '{"state":"CLAIMED"}' |jq .
+curl -s ${ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X POST -d '{"state":"CLAIMED"}' | jq .
 {
   "message": "Changed instance state to CLAIMED"
 }
@@ -217,7 +217,7 @@ curl -s{ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X POST -d
 Let us try to modify something else
 
 ```
- curl -s {ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X POST -d '{"service":"mysql"}' |jq .
+ curl -s ${ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X POST -d '{"service":"mysql"}' |jq .
 {
   "message": "Only supported update is incident state"
 }
