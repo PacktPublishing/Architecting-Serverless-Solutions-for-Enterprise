@@ -223,11 +223,14 @@ Let us try to modify something else
 }
 ```
 
-This completes the testing and covers all the features provided by the alerting system.  Delete the clouodformation stack to avoid additional cost from AWS
+This completes the testing and covers all the features provided by the alerting system.  Delete the cloudformation stack to avoid additional cost from AWS
 
+```
+aws cloudformation delete-stack --stack-name inresponse-v01
 
-
-
+aws cloudformation describe-stacks --stack-name inresponse-v01|jq ".Stacks[0].StackStatus"
+"DELETE_IN_PROGRESS"
+```
 
 
 
