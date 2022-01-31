@@ -1,15 +1,1 @@
-# 👷 `worker-template` Hello World
-
-A template for kick starting a Cloudflare worker project.
-
-[`index.js`](https://github.com/cloudflare/worker-template/blob/master/index.js) is the content of the Workers script.
-
-#### Wrangler
-
-To generate using [wrangler](https://github.com/cloudflare/wrangler)
-
-```
-wrangler generate projectname https://github.com/cloudflare/worker-template
-```
-
-Further documentation for Wrangler can be found [here](https://developers.cloudflare.com/workers/tooling/wrangler).
+A GeoIP middleman API for the Maxminds GeoLite2 API using Cloudflare workers.  For more details and instructions, please refer to : https://github.com/PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise/tree/main/chapter-7

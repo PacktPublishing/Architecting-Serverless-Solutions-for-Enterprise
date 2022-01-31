@@ -81,11 +81,62 @@ Success! Uploaded secret MAXMIND_API_KEY.
 
 ```
 
+You should declare your secrets by adding a section like below to your wrangler.toml file
 
+```
+#[secrets]
+#MAXMIND_API_KEY
+#MAXMIND_API_ACCOUNT
+```
 
+Once this is done, you can copy over the index.js file from this repo to replace the index file inside the worker directory.
 
+```
+root@serverless101:~/geoip# git@github.com:PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise.git /tmp/servereless
+root@serverless101:~/geoip# cp /tmp/serverless/chapter-7/geoip/index.js index.js
+```
 
+You can test locally by running 
 
+```
+root@serverless101:~/geoip$ wrangler dev -i 0.0.0.0
+
+## Test from local
+
+$curl -s -H "X-API-Key: rgKYA3xWbtfGv4sw" "https://{IP_OF_THE_DEV_SERVER_OR_LOCALHOST}}/8.8.8.8"|jq .
+{
+  "country": "US",
+  "latitude": 37.751,
+  "longitude": -97.822
+}
+```
+
+Once this is confirmed to be working, deploy to cloudflare
+
+```
+root@serverless101:~/geoip# wrangler publish
+Basic JavaScript project found. Skipping unnecessary build!
+Successfully published your script to
+ https://geoip.safeer.workers.dev
+```
+
+Now test with same API Key against this domain
+
+```
+$ curl -s -H "X-API-Key: rgKYA3xWbtfGv4sw" "https://geoip.safeer.workers.dev/8.8.8.8"|jq .
+{
+  "country": "US",
+  "latitude": 37.751,
+  "longitude": -97.822
+}
+```
+
+Your worker project is up and running.  Two things to note:
+
+1. The Cloudflare cache manipulation is not done in this code since it requires a custom domain hosted with cloudflare.  It wont work with workers.dev domain.
+2.  When storing API keys, the best practice is to store only a one-way hash of the API key and not the API key directly.  This way if your KV is compromised, the PAI Keys wont cant be misused.
+
+We will fix this and add a few more feature in the next iteration of this project.
 
 
 
