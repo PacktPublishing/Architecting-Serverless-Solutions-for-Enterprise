@@ -85,7 +85,18 @@ The kn CLI provided by Redhat is patched to have an extention to the CLI - 'func
 
 To know more about the functions visit - https://developers.redhat.com/products/cloudfunctions/overview
 
-Ensure that you have also logged into your docker account using the command `docker login`
+Ensure that you have also logged into your docker account using the command `docker login`.  Once logged in also setup this docker token as a secret in kubernetes to be used wiht docker registry
+
+Detailed instructions are at this [link](https://docs.openshift.com/container-platform/4.10/openshift_images/managing_images/using-image-pull-secrets.html)
+```
+
+
+safeer@serverless102:~$ oc create secret generic safeercm-dh-pull-sercret     --from-file=.dockerconfigjson=/home/safeer/.docker/config.json --type=kubernetes.io/dockerconfigjson
+secret/safeercm-dh-pull-sercret created
+
+safeer@serverless102:~/os-pyhttpone$ oc secrets link default safeercm-dh-pull-sercret --for=pull
+
+```
 
 Now that we have setup the environement for OpenShift, let get back to the main dock for creating our webhook and finishing the project
 
