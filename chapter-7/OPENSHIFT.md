@@ -8,19 +8,19 @@ After your signup you will get an email with the direct link to your sandbox.  I
 
 Once you login, your cloud console will look like this.  There are two view for OpenShift - Administrator and Developer.  As the names suggest, they make it easy for you to manage the resources from an Administrator or Dveloper perspective.  Explore this console a little bit.
 
-Image: openshift-console-default-view
+I![Openshift default view](images/openshift-console-default-view.png)
 
 The administrator view provides a complete view into resources you can provision as well as the ones that are already provisioned and can be managed
 
-Image: openshift-adminsitrator
+![Openshift Administrator view](images/openshift-administrator-view.png)
 
 Following is the developer view - this makes it easy for a developer to navigate the UI to create and deploy their apps
 
-Image: openshift-developer
+![Ooenshift Developerview](images/openshift-developer-view.png)
 
 It is easier to use the openshift CLI - “oc” - from the builtin cloud shell u can launch from the console.  You will see a shell icon on the top right corner, clicking that will launch a shell within the console UI.  Remember that this shell is ephemeral and will get shutdown after some inactivity.  So do not keep anything important in the home dir, and it wont retain your shell history or outputs.
 
-Image: openshift-console-shell
+![Oppenshift cloud shell](images/openshift-cloud-shell.png)
 
 Now that you are familiar with the Openshift console, lets go back to shell and setup our developer environment.  We will manage the openshift kubernetes cluster from the CLI. For this we need to setup the “oc”, “kubectl”, "kn" and “docker” CLIs.  I am using an Ubuntu 20.04 VM for this.  You might have to alter the installations instructions for your platform by consulting the official documentations.
 
@@ -69,7 +69,7 @@ Welcome! See 'oc help' to get started.
 ```
 Now that your cluster is setup, let us explore serverless on OpneShift.  OpenShift provides serverless using Knative.  In the Openshfit cloud, the knative operators are installed by default as you can see below from the console administrator view
 
-Iamge: openshift-cli
+![Openshift Serverless Operator](images/openshift-serverless-operator.png)
 
 ```
 You can download the CLI and set it upa s follows
