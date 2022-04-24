@@ -89,4 +89,3 @@ Now use this URL in the GitHub webhook configuration as menioned in the document
 Once this is done initiate a commit from your repo, and you will receive a message that looks like this
 
 Image: 
-
