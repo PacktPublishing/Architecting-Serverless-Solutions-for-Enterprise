@@ -56,6 +56,7 @@ safeer@serverless102:~/ghwebhook$ echo "requests" >> requirements.txt
 Replace the stock func.py with the code provided in this repo
 
 ```
+safeer@serverless102:~/ghwebhook$ wget https://raw.githubusercontent.com/PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise/main/chapter-7/pywebhook/func.py -O /tmp/func.py --quiet
 safeer@serverless102:~/ghwebhook$ cp /tmp/func.py func.py
 ```
 
