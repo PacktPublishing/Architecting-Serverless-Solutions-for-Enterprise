@@ -1,4 +1,4 @@
-Setting up Watson IoT
+# Setting up Watson IoT
 
 IBM Cloud’s IoT platforms is called IBM Watson IoT platform and you need to create an instance/service of the platform ( or a cloud resource ) from the cloud console as follows,
 
