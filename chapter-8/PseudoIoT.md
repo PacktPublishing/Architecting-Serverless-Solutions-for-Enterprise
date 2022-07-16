@@ -42,27 +42,7 @@ You can find the script below.  This script can be run in regular intervals to s
 
 *this code can also be found in the following file [code/pseudo-iot.py](code/pseudo-iot.py)*
 
-```
-import json
-import os
-import time
-import random
-import paho.mqtt.client as mqtt
-
-client = mqtt.Client(os.environ['DEV_ID'])
-client.tls_set()
-client.tls_insecure_set(True)
-
-client.username_pw_set('use-token-auth', os.environ['MQTT_TOKEN'])
-client.connect(os.environ['MQTT_HOST'], 8883, 60)
-
-n = random.randint(20,80)
-ts = time.strftime('%s')
-payload = {'d':{ts: n}}
-client.publish('iot-2/evt/test/fmt/json', json.dumps(payload),1)
-client.loop()
-client.disconnect()
-```
+https://github.com/PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise/blob/7d09edc44adc5cbc32a6bd7152f6518b39035c1b/chapter-8/code/pseudo-iot.py
 
 Now you can run this code as 
 ```
