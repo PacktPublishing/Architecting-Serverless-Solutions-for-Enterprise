@@ -42,7 +42,7 @@ You can find the script below.  This script can be run in regular intervals to s
 
 *this code can also be found in the following file [code/pseudo-iot.py](code/pseudo-iot.py)*
 
-https://github.com/PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise/blob/7d09edc44adc5cbc32a6bd7152f6518b39035c1b/chapter-8/code/pseudo-iot.py
+https://github.com/PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise/blob/7d09edc44adc5cbc32a6bd7152f6518b39035c1b/chapter-8/code/pseudo-iot.py#L1-L19
 
 Now you can run this code as 
 ```
