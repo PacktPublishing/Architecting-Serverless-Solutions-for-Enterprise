@@ -64,4 +64,12 @@ client.loop()
 client.disconnect()
 ```
 
-Now you can run this code as `python3 code/pseudo-iot.py`
+Now you can run this code as 
+```
+python3 code/pseudo-iot.py
+```
+
+You can also run it every 30 seconds in a loop like this:
+```
+while true;do python3 code/pseudo-iot.py;done
+```
