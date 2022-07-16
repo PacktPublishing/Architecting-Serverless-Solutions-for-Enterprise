@@ -9,8 +9,9 @@ Details instruction for this is given in the ibm cloud documentation [here](http
 This is the summary of what we need.  
 
 _orgid: The organiztaion id of you the Watson IoT instance you created earlier.  This was `35v16x`
-device
+
 _devicetype: Type of the device that was added to the platform - for us this was temperature-sensor
+
 _deviceid: ID of the device that was added - this is temp-sensor-101 in our case
 
 We had also created a security token in the previous section: `y&c*yMm!Tw34`
