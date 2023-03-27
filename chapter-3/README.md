@@ -25,7 +25,7 @@ Any incident will have three severity levels, CRIT/ERR/WARN. Similarly, each inc
 
 The following diagram summarizes the implementation: 
  
-![InResponse Arch Diagram](chapter-3/packt-chapt-3-inresponse-design.png)
+![InResponse Arch Diagram](images/packt-chapt-3-inresponse-design.png)
 
 Let us examine each part in detail. 
 ## API Gateway - Incident API 
