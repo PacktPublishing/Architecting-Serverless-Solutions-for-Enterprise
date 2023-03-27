@@ -1,237 +1,126 @@
-# Serverless Alert Management System
+# Lightweight alert manager 
 
-This repo provides code and automation required to setup a minimal alert management system using AWS serverless technologies
+Service monitoring and alerting is an essential practice for any infrastructure. We use a lot of tools to collect active and passive check results, metrics, etc. Once a problem is detected, it is essential to alert the owner of the broken system. The solution we are designing is for alerting for an issue detected in any monitoring systems. These issues are called incidents that need to be acknowledged by an oncall engineer responsible for managing a service’s infrastructure. If the oncall fails to acknowledge the incident ( and subsequently work on it) the issue should be escalated to the team manager or other leadership depending on the escalation policy defined. 
 
-## What you need
+For ease of referring, we will call this service InResponse. 
 
-- One AWS account with administrative access
-- Three email addresses
-  - One for sending the alerts
-  - Two for receiving the alerts - one each for the oncall engineer and manager
-- Git and AWS CLI - AWS CLI should be setup with the right IAM credentials
-- Python3 and boto3 library installed
-- An IDE of choice if you wish to modify the code
-- jq JSON parser CLI for parsing AWS CLI outputs
+## High level solution design 
 
-## Outline of the process to setup and test the project
+In the following list, we cover the core design decisions and workflow for the alert manager. 
 
-- Use the provided script to update AWS SES to add three email identities
-- Run the AWS CloudFormation template to provision the cloud resources using aws CLI.  This include
-  - Four DynamoDB Tables
-    - Config: Storing configuration - current incident id for auto-increment
-    - Incident: All incidents
-    - Service - Storing Service to Team ownership relation
-    - Oncall - Oncall calendar for teams
-  - Two Lambda Functions and its IAM Role and Policy
-    - IncidentProcessor - Accept the incident from API Gateway, process it, store to Incdient table and initiate step function
-    - IncidentNotifier - Invoked by the step function for sending email to oncall and escalation
-  - One Step Function and its IAM Role and Policy
-    - Used to send email alert to oncall engineer and alert the manager after 5 minutes
-  - One HTTP API Gateway V2 and IAM policy
-    - One Endpoint for all action
-    - PUT method to store incident
-    - POST method to modify incident - only for claiming incident
-    - GET method to retrieve incident
-    - No authentication
-  - Three Parameter Store Entries
-    - Sender Email for SES
-    - State machine ARN for Lambda IncientProcessor
-    - API Endpoint - for creators to retrieve the base URL
-- Update the code for two lambda functions - processor and notifier
-  - Each function a single python file with handler and other methods
-  - These file are in its own diretories and should be archived to a zip file
-  - Once the zip file is created, they can be uploaded and applied to the lambda functions using aws CLI
-- Insert test data to the dynamodb tables
-  - Incident Table doesnt require any data
-  - Config Table and Service Table
-    - Load the dummy data from the json file provided
-  - Oncall table
-    - Use the provided script to generate oncall data for one week 
-  - Use aws CLI to batch load the data to the tables
+- The minimum expected functionality of this system is to receive an incident, alert the oncall and escalate through the escalation matrix if the incident is not acknowledged in defined time  
+- All monitoring systems will post their incidents to our alerting API endpoint. This will be processed and acknowledged back with an incident number 
+- The incident should contain at minimum a service name, severity, state, title, message and detection time. 
+- Given the alert will be posted by different systems, optionally a source monitoring system name (nagios/prometheus etc) can also be added to the incident.  
+- Every service will have an owning team and the team will have an oncall calendar and an escalation matrix. 
+- Once the incident is posted to the alerting endpoint it is checked for validity, added to a database with a unique incident number 
+- After adding the incident to the DB, a workflow is kicked off to handle the alerting. This workflow will be responsible for the first alert to the oncall engineer as well as the escalation alerts to further levels as defined in the team escalation matrix. 
+- If the incident is acknowledged, no further alerts will be sent out. Alerting API will also have an endpoint to acknowledge the incident. 
 
+There are many more features as well as checks and boundaries that need to be defined in a full-fledged alerting system. Limiting the scope of this exercise as the aim is to demonstrate some of the serverless capabilities in AWS. 
 
-## Setup Instructions
+Any incident will have three severity levels, CRIT/ERR/WARN. Similarly, each incident state will be one of OPEN/CLAIMED/RESOLVED. 
 
-Checkout this repo and change to the root directory of the repo. Then switch to the 'chapter-3' directory 
+## Implementation 
 
-```
-git clone git@github.com:PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise.git
-cd chapter-3
-```
+The following diagram summarizes the implementation: 
+ 
+------Figure 3.7 - InResponse Architecture Diagram-----
 
-The repo is structured as follows:
+Let us examine each part in detail. 
+## API Gateway - Incident API 
+This would be an HTTP API with one endpoint “/incidents”. The API will support 3 methods as follows: 
+- PUT - Add a new incident - done by monitoring systems 
+- POST - Update the incident - used for acknowledging 
+- GET - Retrieve the incident data 
 
-```
-.
-|-- cloudformation
-|   `-- inresponse.cf.yml
-|-- data
-|   |-- dynamo-data.json
-|   |-- invalid-incident.json
-|   |-- oncalltable.json
-|   `-- sample-incident.json
-|-- lambda
-|   |-- notifier
-|   |   `-- lambda_function.py
-|   `-- processor
-|       `-- lambda_function.py
-|-- scripts
-|   |-- oncalltable.py
-|   `-- ses-email-verify.py
-`-- README.md
-```
-Let us go through each steps
+The API will accept an API Key for authentication. 
 
-### Add three email addresses to SES
+## Lambda - Incident Processor 
 
-- AWS Simple Email Service need to verify each email before using it to send out messages
-- For this you need to add these emails ( called identities in SES) to SES for verification
-- SES email addition is not supported by cloudformation, hence a utility script is provided to add the three emails to SES
-- Once these emails are added for verification each will receive a verification link from AWS
-- Each email need to be manually verified post whcih they can be used for sending and receiving emails
+The API will trigger this lambda function for each request. Lambda would do the following tasks: 
+- Accept the request and process it. For GET and POST methods, the flow is just to retrieve the incident from DB/Update the incident in the DB 
+- For the PUT method, a new incident entry is created in the Incident Table in DynamoDB. A unique incident ID will be assigned to this incident. 
+- Each service has an owner team, and the owner team will have an oncall calendar. Oncall calendar contains the date(s) and email of the corresponding oncall engineer and his/her manager.  
+- These two emails will be collected as a list and will be passed onto a step function along with the incident. This step function will be invoked asynchronously 
+- An HTTP response would be returned to the API caller. 
 
-- We need three email ids for this experiment, one for sending email, two for receiving - oncall and escalation.
-- For demonstrations, we are using three fictional emails - alerts@inresponse.com,oncall@inresponse.com,escalation@inresponse.com
-- When running these automations, please replace the emails with real ones
+## Step Function - Alerting and Escalation Processing 
 
-To verify these identities, run the following command
+The alert matrix would look like this: 
 
-```
-python3 scripts/ses-email-verify.py alerts@inresponse.com,oncall@inresponse.com,escalation@inresponse.com
-```
+> safeer@inresponse.in, manoj@inresponse.in 
 
-If all goes good, you will see one request ID per email as output.
-Failing of this script is not a blocker for deploying the solution, but when you run it the email sending will fail
+This means, the email to Safeer should be delivered at 0 minutes waits (that is, now!) and if he did not acknowledge the error in 10 minutes (which is the default escalation time set for in response) an escalation email should be sent to the given second entry - Manoj (this would be first level escalation where Safeer’s manager, Manoj, will be notified). 
 
-## Run the cloudfromation template to create all AWS resources
+The step function will receive an incident and this matrix from Lambda. It will use two tasks (steps) to send out these alerts. For the escalation step, a wait step of 10 minutes will be introduced before the alerting step. For each alert, a lambda will be invoked with the incident and notification email. 
 
-This template will create all resource required and then save the API endpoint to AWS parameter store, which can be used for testing out the alerting sevice .  Replace the email `alerts@inresponse.com` with the right sender email
+## Lambda - Notifier 
 
-```
-aws cloudformation create-stack --stack-name inresponse-v01 --template-body file://./cloudformation/inresponse.cf.yml --parameters ParameterKey=SenderEmail,ParameterValue=alerts@inresponse.com --capabilities CAPABILITY_NAMED_IAM
-```
+The notifier lambda has a simple job of using the AWS Simple Email Service to send email to the given emails with the details of the incident. 
+Simple Email Service - SES 
+SES requires you to verify the emails used for sending and receiving messages. This should be done in advance before trying out the code. To know more about how to do this, visit https://docs.aws.amazon.com/console/ses/sending-email 
 
-This will return a stack id which can be used for checking the status. The following command should return `CREATE_COMPLETE`
+## DynamoDB Tables 
 
-```
-aws cloudformation describe-stacks --stack-name inresponse-v01|jq ".Stacks[0].StackStatus"
-```
+While Dynamo Doesn't need a schema to be defined (apart from the index/primary key), the following structures for tables are given to provide an understanding to the reader. 
 
-Once the stack creeation is completed you can retrieve the API endpoint from parameter store and save it in a shell variable to be used later
+### Incident Table: 
 
-```
-ALERTS_API_ENDPOINT=$(aws ssm get-parameter --name /inresponse/apiendpoint|jq -r ".Parameter.Value")
-```
+{ 
+ “incidentId”: 10000 
+ “severity”: “ERR”, 
+ “service”: “athens”, 
+ “description”: “5xx error rate above 5% in payment service”, 
+ “state”: “OPEN”, 
+ “source”: “nagios”, 
+ “title”: “5xx Error Spike” 
+} 
+Partition Key: incidentId 
 
-The value would be something like `https://abcd12345.execute-api.ap-south-1.amazonaws.com` with the first and third part of the domain name varying
+### Service Table: 
 
-## Update the code for both lambda functions
+{ 
+ "serviceId": "argos", 
+ "team": "devops", 
+} 
 
-The lambda functions were created with dummy code, now we need to update the function code as follows.
+Partition Key: serviceId 
 
-```
-cd lambda
+### OncallCalendar Table: 
 
-zip -r processor.zip processor
+{ 
+ "teamname": "devops", 
+ "day": "2020-09-10", 
+ “oncall”: “safeer@inresponse.in”,  
+ “escalation”: “manoj@inresponse.in” 
+} 
+ 
+Partition Key: teamname 
+Sort Key: day 
 
-zip -r notifier.zip notifier
+### Config Table: 
 
-aws lambda update-function-code --function-name InResponseIncidentProcessor1 --zip-file fileb://processor.zip
+This table holds some configuration information. For this demo it will only have the latest incident ID (needed when creating a new ID). 
 
-aws lambda update-function-code --function-name InResponseIncidentNotifier --zip-file fileb://notifier.zip
+{ 
+ "configkey": "incidentId", 
+ "currentId": 100000 
+} 
+ 
+Partition Key: configkey 
 
-cd ..
-```
+These tables should be sufficient to cover all our data needs. Now, let us look at the lambda functions required for the project. 
 
-## Insert data into DynamoDB tables
+## Lambda Functions 
 
-First let us generate oncall data.  Thee is a sample file that contains dummy data in the data directory, following script will overwrite it.  Provide the oncall and escalation emails as comma seperated list to the script
+We need two lambda functions: one for handling the incoming incident as well as CRUD operations on them and the second for taking care of notifying the right contacts. 
 
-```
-python3 scripts/oncalltable.py oncall@inresponse.com,escalation@inresponse.com
-```
+### Incident Processor 
 
-Now load this and the `dynamo-data.json` file to DDB
+This lambda has to handle three HTTP method use cases. So there will be three helper functions for each. The handler will examine the “context” passed to it and call the helper functions. 
 
-```
-aws dynamodb batch-write-item --request-items file://./data/dynamo-data.json
+### Notifier 
 
-aws dynamodb batch-write-item --request-items file://./data/oncalltable.json
-
-```
-
-This completes our setup, now we can test the API
-
-## API Testing
-
-First let us submit a valid incident to the API
-
-```
-curl -s ${ALERTS_API_ENDPOINT} -H "content-type: application/json" -X PUT -d @data/sample-incident.json
-
-{"message": "Added incident with incident number 1001"}
-
-```
-
-Repeat this command a few time so that your DB will have some more incidents.
-
-Now let us try an invlid incident ( this is the same incident as before , with the service name changed to a name that is not in the Service DDB table )
-
-```
-curl -s ${ALERTS_API_ENDPOINT} -H "content-type: application/json" -X PUT -d @data/invalid-incident.json
-{"message": "Invalid Service"}
-```
-Now let us retrieve the incident we created
-
-```
-curl -s ${ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X GET|jq .
-{
-  "service": "athena",
-  "IncidentId": "1002",
-  "source": "nagios",
-  "time": "1639171486",
-  "description": "5xx error rate above 5% in payment service",
-  "severity": "ERR",
-  "state": "OPEN",
-  "title": "5xx Error Spike"
-}
-```
-Try to retrieve a non-existing incident
-
-```
-curl -s ${ALERTS_API_ENDPOINT}/1022 -H "content-type: application/json" -X GET
-{"message": "Incident Not found"}
-```
-
-By now the first email alert will be received at oncall@inresponse.com and after five minutes the escalation email will be received at escalation@inresponse.com
-
-Now let us try to acknowledge the incident to prevent escalation.  Try this within five minutes of the incident is created - to verify incident is not escalated and you dont receive any emails to escalation@inresponse.com
-
-```
-curl -s ${ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X POST -d '{"state":"CLAIMED"}' | jq .
-{
-  "message": "Changed instance state to CLAIMED"
-}
-```
-
-Let us try to modify something else
-
-```
- curl -s ${ALERTS_API_ENDPOINT}/1002 -H "content-type: application/json" -X POST -d '{"service":"mysql"}' |jq .
-{
-  "message": "Only supported update is incident state"
-}
-```
-
-This completes the testing and covers all the features provided by the alerting system.  Delete the cloudformation stack to avoid additional cost from AWS
-
-```
-aws cloudformation delete-stack --stack-name inresponse-v01
-
-aws cloudformation describe-stacks --stack-name inresponse-v01|jq ".Stacks[0].StackStatus"
-"DELETE_IN_PROGRESS"
-```
-
-
-
-
+Notifier will construct an email from the incident and send it to the email id passed on to the handler. 
+This should provide enough ideas about the service components. Now, let us build the solution. All provisioning will be done with cloud formation and the Lambda code will be in python. Step function will have its DSL based definition. 
