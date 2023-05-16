@@ -179,7 +179,7 @@ From another window, upload an image as follows:
 wget https://avatars.githubusercontent.com/u/10974906 -O packgt-logo-460by460.jpg
 ```
 
-This is a pack log in 460 by 460 pixels, which will upload as follows:
+This is a packt logo in 460 by 460 pixels, which will be uploaded to the image upload container as follows:
 
 ```
 nm=1;az storage blob upload --account-name  packtsvrless101storage1 --container-name pktsvrls-imgupload --name packgt-logo-460by460-${nm}.jpg --file ~/packgt-logo-460by460.jpg --auth-mode login --overwrite
@@ -187,13 +187,13 @@ nm=1;az storage blob upload --account-name  packtsvrless101storage1 --container-
 
 If you want to test repeatedly, you can just update the variable `nm` at the beginning of the command to a new number/string.
 
-Once you upload the image, you will see on iamge processing result on the shell window where you ran `func start`.  now you can publish this code to azure.
+Once you upload the image, you will see the iamge processing result on the shell window where you ran `func start`.  Now you can publish this code to azure.
 
 ```
 cd ..
 func azure functionapp publish pktsvrlsImageManager --python
 ```
 
-You can repeate the image upload and test the function again.
+You can repeat the image upload and test the function again.
 
 To see the resized image, you can go to the azure console, and go to the storage account.  Similarly, you can go to CosmosDB databases and use data explorer to see the image metadata you udpated.
