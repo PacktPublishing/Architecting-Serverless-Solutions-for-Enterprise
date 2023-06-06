@@ -134,6 +134,7 @@ Deploy the cloud run function
 
 ```
 cd anpr
+gcloud builds submit --tag gcr.io/${PROJECT_ID}/anpr-processor; 
 gcloud run deploy anpr-processor  --image gcr.io/${PROJECT_ID}/anpr-processor  	--allow-unauthenticated --set-env-vars TOPIC_PATH=${TOPIC_PATH}
 ```
 
