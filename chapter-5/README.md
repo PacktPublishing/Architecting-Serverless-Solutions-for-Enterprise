@@ -88,8 +88,8 @@ NUMPLATE_TOPIC=${PROJECT_ID}-platetopic
 Create buckets, topic and retrive the full path of the topic ( needed for publishing )
 
 ```
-gcloud storage buckets create gs://${NUMPLATE_BUCKET}
-gcloud storage buckets create gs://${SPEEDINGTICKET_BUCKET}
+gcloud storage buckets create gs://${NUMPLATE_BUCKET} --location ${GCP_REGION}
+gcloud storage buckets create gs://${SPEEDINGTICKET_BUCKET} --location ${GCP_REGION}
 gcloud pubsub topics create ${NUMPLATE_TOPIC}
 TOPIC_PATH=$(gcloud pubsub topics describe ${NUMPLATE_TOPIC} --format='value(name)')
 ```
@@ -121,7 +121,7 @@ gcloud spanner rows insert --database=${DBNAME}  --table=${TABLE} --data=NumPlat
 
 ### Deploy the cloud run service
 
-We will deploy the cloud run service and add a storage trigger that will run the code when an image is uploaded to the GCP bucker ${NUMPLATE_BUCKET}
+We will deploy the cloud run service and add a storage trigger that will run the code when an image is uploaded to the GCP bucket ${NUMPLATE_BUCKET}
 
 Checkout the tutorial repo
 
