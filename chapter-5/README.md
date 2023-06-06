@@ -196,5 +196,6 @@ You can download these PDFs from the cloud console to veiw them.  If you run int
 Deleteing a GCP project will delete all the resources under it.  Use the following command to cleanup everything that you created
 
 ```
+gcloud spanner instances delete ${DBINSTANCE}
 gcloud projects delete ${PROJECT_ID}
 ```
