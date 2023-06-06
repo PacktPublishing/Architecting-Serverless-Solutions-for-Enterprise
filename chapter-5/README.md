@@ -51,7 +51,7 @@ Create additional vraiables needed for gcloud CLI, and set the default configura
 
 ```
 PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')
-GCP_REGION=”us-central1”
+GCP_REGION="us-central1"
 
 gcloud config set run/region ${GCP_REGION}
 gcloud config set run/platform managed
@@ -88,8 +88,8 @@ NUMPLATE_TOPIC=${PROJECT_ID}-platetopic
 Create buckets, topic and retrive the full path of the topic ( needed for publishing )
 
 ```
-​​gcloud storage buckets create ${NUMPLATE_BUCKET}
-​gcloud storage buckets create ${SPEEDINGTICKET_BUCKET}
+gcloud storage buckets create ${NUMPLATE_BUCKET}
+gcloud storage buckets create ${SPEEDINGTICKET_BUCKET}
 gcloud pubsub topics create ${NUMPLATE_TOPIC}
 TOPIC_PATH=$(gcloud pubsub topics describe ${NUMPLATE_TOPIC} --format='value(name)')
 ```
