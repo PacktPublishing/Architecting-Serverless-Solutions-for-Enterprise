@@ -88,8 +88,8 @@ NUMPLATE_TOPIC=${PROJECT_ID}-platetopic
 Create buckets, topic and retrive the full path of the topic ( needed for publishing )
 
 ```
-gcloud storage buckets create ${NUMPLATE_BUCKET}
-gcloud storage buckets create ${SPEEDINGTICKET_BUCKET}
+gcloud storage buckets create gs://${NUMPLATE_BUCKET}
+gcloud storage buckets create gs://${SPEEDINGTICKET_BUCKET}
 gcloud pubsub topics create ${NUMPLATE_TOPIC}
 TOPIC_PATH=$(gcloud pubsub topics describe ${NUMPLATE_TOPIC} --format='value(name)')
 ```
