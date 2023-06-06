@@ -31,6 +31,8 @@ gcloud projects create ${PROJECT_ID}
 gcloud config set project ${PROJECT_ID}
 ```
 
+Once the project is created, you will have to enable billing for this project from the GCP Cloud Console.  Select the new project name from the upper left side of the console, and it will show a button to enable billing.  Once done, procceed to next step.
+
 Enable all GCP services required by this project
 
 ```
