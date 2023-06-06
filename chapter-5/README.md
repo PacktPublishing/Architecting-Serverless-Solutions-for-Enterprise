@@ -171,3 +171,17 @@ gsutil cp plate-images/CCC444.jpg gs://${NUMPLATE_BUCKET}
 gsutil cp plate-images/MH12DE1433.jpg gs://${NUMPLATE_BUCKET}
 ```
 
+Verify the pipeline has worked by listing the speeding tickets in the destinatin bucket as follows:
+
+```
+gsutil ls  gs://${SPEEDINGTICKET_BUCKET}
+```
+
+If everything worked as expected, you will see the following output ( your bucket name will vary )
+
+```
+gs://packt-serverless201-xyz-speedingticket/CCC444.pdf
+gs://packt-serverless201-xyz-speedingticket/MH12DE1433.pdf
+```
+
+You can download these PDFs from the cloud console to veiw them.  If you run into problems, use Log Explorer service to view logs and see what errors are showing up.
