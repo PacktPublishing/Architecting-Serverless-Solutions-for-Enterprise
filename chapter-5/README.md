@@ -185,4 +185,4 @@ gs://packt-serverless201-xyz-speedingticket/CCC444.pdf
 gs://packt-serverless201-xyz-speedingticket/MH12DE1433.pdf
 ```
 
-You can download these PDFs from the cloud console to veiw them.  If you run into problems, use Log Explorer service to view logs and see what errors are showing up.
+You can download these PDFs from the cloud console to veiw them.  If you run into problems, use Log Explorer service to view logs and see what errors are showing up.  If you quickly wanna see how they look, checkout the [tickets](tickets) dirctory and compare them against the numberplate images under [plate-images](plate-images) directory
