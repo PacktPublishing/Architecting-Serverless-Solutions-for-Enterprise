@@ -54,6 +54,7 @@ GCP_REGION=”us-central1”
 gcloud config set run/region ${GCP_REGION}
 gcloud config set run/platform managed
 gcloud config set eventarc/location ${GCP_REGION}
+gcloud config set functions/region ${GCP_REGION}
 ```
 
 ### Setup service accounts and assign permissions
