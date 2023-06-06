@@ -148,7 +148,8 @@ Eventarc rule for triggering anpr-processor cloud run service on every image upl
      --destination-run-region=${GCP_REGION} \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
      --event-filters="bucket=${NUMPLATE_BUCKET}" \
-     --service-account=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com
+     --service-account=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+     --location ${GCP_REGION}
 ```
 
 ### Deploy Cloud Function to generate speeding ticket
