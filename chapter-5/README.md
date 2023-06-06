@@ -96,11 +96,11 @@ TOPIC_PATH=$(gcloud pubsub topics describe ${NUMPLATE_TOPIC} --format='value(nam
 
 ### Create Cloud Spanner DB, Table and load data
 
-Create the Spanner Instance, Database
+Create the Spanner Instance, Database.  Note that database name cant exceed 30 characters, so modify your dbname accordingly
 
 ```
 DBINSTANCE=${PROJECT_ID}-spanner-in
-DBNAME=${PROJECT_ID}-spanner-db
+DBNAME=${PROJECT_ID}-spdb
 TABLE="Owner"
 
 gcloud spanner instances create ${DBINSTANCE} --config=regional-us-central1  --description="Spanner Instance" --nodes=1
