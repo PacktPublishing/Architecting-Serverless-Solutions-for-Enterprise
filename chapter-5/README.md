@@ -98,14 +98,13 @@ TOPIC_PATH=$(gcloud pubsub topics describe ${NUMPLATE_TOPIC} --format='value(nam
 
 Create the Spanner Instance, Database.  Note that database name cant exceed 30 characters, so modify your dbname accordingly
 
->** WARNING: Cloud Spanner is a costly resource and you billing can overshoot to large amounts quickly!!!  Make sure to finish this tutorial in one go and delete all resources immediately after.  DO NOT KEEP SPANNER INSTANCE RUNNING!! Instructions for deleting resources is given at the end of the tutorial **
-
 ```
 DBINSTANCE=${PROJECT_ID}-spanner-in
 DBNAME=${PROJECT_ID}-spdb
 TABLE="Owner"
 
-gcloud spanner instances create ${DBINSTANCE} --config=regional-us-central1  --description="Spanner Instance" --nodes=1
+gcloud spanner instances create ${DBINSTANCE} --config=regional-${GCP_REGION} --instance-type=free-instance --description="Spanner Instance" 
+
 gcloud config set spanner/instance ${DBINSTANCE}
 gcloud spanner databases create ${DBNAME}
 ```
