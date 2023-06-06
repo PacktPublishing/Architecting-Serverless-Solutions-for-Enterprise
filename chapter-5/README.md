@@ -31,6 +31,8 @@ gcloud projects create ${PROJECT_ID}
 gcloud config set project ${PROJECT_ID}
 ```
 
+Once the project is created, you will have to enable billing for this project from the GCP Cloud Console.  Select the new project name from the upper left side of the console, and it will show a button to enable billing.  Once done, procceed to next step.
+
 Enable all GCP services required by this project
 
 ```
@@ -49,11 +51,12 @@ Create additional vraiables needed for gcloud CLI, and set the default configura
 
 ```
 PROJECT_NUMBER=$(gcloud projects describe ${PROJECT_ID} --format='value(projectNumber)')
-GCP_REGION=”us-central1”
+GCP_REGION="us-central1"
 
 gcloud config set run/region ${GCP_REGION}
 gcloud config set run/platform managed
 gcloud config set eventarc/location ${GCP_REGION}
+gcloud config set functions/region ${GCP_REGION}
 ```
 
 ### Setup service accounts and assign permissions
@@ -85,19 +88,19 @@ NUMPLATE_TOPIC=${PROJECT_ID}-platetopic
 Create buckets, topic and retrive the full path of the topic ( needed for publishing )
 
 ```
-​​gcloud storage buckets create ${NUMPLATE_BUCKET}
-​gcloud storage buckets create ${SPEEDINGTICKET_BUCKET}
+gcloud storage buckets create gs://${NUMPLATE_BUCKET} --location ${GCP_REGION}
+gcloud storage buckets create gs://${SPEEDINGTICKET_BUCKET} --location ${GCP_REGION}
 gcloud pubsub topics create ${NUMPLATE_TOPIC}
 TOPIC_PATH=$(gcloud pubsub topics describe ${NUMPLATE_TOPIC} --format='value(name)')
 ```
 
 ### Create Cloud Spanner DB, Table and load data
 
-Create the Spanner Instance, Database
+Create the Spanner Instance, Database.  Note that database name cant exceed 30 characters, so modify your dbname accordingly
 
 ```
 DBINSTANCE=${PROJECT_ID}-spanner-in
-DBNAME=${PROJECT_ID}-spanner-db
+DBNAME=${PROJECT_ID}-spdb
 TABLE="Owner"
 
 gcloud spanner instances create ${DBINSTANCE} --config=regional-us-central1  --description="Spanner Instance" --nodes=1
@@ -118,7 +121,7 @@ gcloud spanner rows insert --database=${DBNAME}  --table=${TABLE} --data=NumPlat
 
 ### Deploy the cloud run service
 
-We will deploy the cloud run service and add a storage trigger that will run the code when an image is uploaded to the GCP bucker ${NUMPLATE_BUCKET}
+We will deploy the cloud run service and add a storage trigger that will run the code when an image is uploaded to the GCP bucket ${NUMPLATE_BUCKET}
 
 Checkout the tutorial repo
 
@@ -131,6 +134,7 @@ Deploy the cloud run function
 
 ```
 cd anpr
+gcloud builds submit --tag gcr.io/${PROJECT_ID}/anpr-processor; 
 gcloud run deploy anpr-processor  --image gcr.io/${PROJECT_ID}/anpr-processor  	--allow-unauthenticated --set-env-vars TOPIC_PATH=${TOPIC_PATH}
 ```
 
@@ -144,7 +148,8 @@ Eventarc rule for triggering anpr-processor cloud run service on every image upl
      --destination-run-region=${GCP_REGION} \
      --event-filters="type=google.cloud.storage.object.v1.finalized" \
      --event-filters="bucket=${NUMPLATE_BUCKET}" \
-     --service-account=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com
+     --service-account=${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+     --location ${GCP_REGION}
 ```
 
 ### Deploy Cloud Function to generate speeding ticket
@@ -167,3 +172,17 @@ gsutil cp plate-images/CCC444.jpg gs://${NUMPLATE_BUCKET}
 gsutil cp plate-images/MH12DE1433.jpg gs://${NUMPLATE_BUCKET}
 ```
 
+Verify the pipeline has worked by listing the speeding tickets in the destinatin bucket as follows:
+
+```
+gsutil ls  gs://${SPEEDINGTICKET_BUCKET}
+```
+
+If everything worked as expected, you will see the following output ( your bucket name will vary )
+
+```
+gs://packt-serverless201-xyz-speedingticket/CCC444.pdf
+gs://packt-serverless201-xyz-speedingticket/MH12DE1433.pdf
+```
+
+You can download these PDFs from the cloud console to veiw them.  If you run into problems, use Log Explorer service to view logs and see what errors are showing up.
