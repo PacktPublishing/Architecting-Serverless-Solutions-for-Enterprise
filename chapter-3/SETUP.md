@@ -53,7 +53,7 @@
 Checkout this repo and change to the root directory of the repo. Then switch to the 'chapter-3' directory 
 
 ```
-git clone git@github.com:PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise.git
+git clone git@github.com:PacktPublishing/Architecting-Cloud-Native-Serverless-Solutions.git
 cd chapter-3
 ```
 

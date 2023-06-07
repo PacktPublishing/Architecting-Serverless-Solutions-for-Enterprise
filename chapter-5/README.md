@@ -126,8 +126,8 @@ We will deploy the cloud run service and add a storage trigger that will run the
 Checkout the tutorial repo
 
 ```
-git clone git@github.com:PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise.git
-cd Architecting-Serverless-Solutions-for-Enterprise/chapter-5
+git clone git@github.com:PacktPublishing/Architecting-Cloud-Native-Serverless-Solutions.git
+cd Architecting-Cloud-Native-Serverless-Solutions/chapter-5
 ```
 
 Deploy the cloud run function

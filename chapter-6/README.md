@@ -92,7 +92,7 @@ You should declare your secrets by adding a section like below to your wrangler.
 Once this is done, you can copy over the index.js file from this repo to replace the index file inside the worker directory.
 
 ```
-root@serverless101:~/geoip# git@github.com:PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise.git /tmp/servereless
+root@serverless101:~/geoip# git@github.com:PacktPublishing/Architecting-Cloud-Native-Serverless-Solutions.git /tmp/servereless
 root@serverless101:~/geoip# cp /tmp/serverless/chapter-7/geoip/index.js index.js
 ```
 

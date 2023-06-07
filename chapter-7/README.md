@@ -1,4 +1,44 @@
-# Github webhook and Telegram Notification
+# Chapter 7 - Serverless on Kubernetes- Knative and OpenFaaS
+
+## Project - Github webhook and Telegram Notification
+
+As thtitle suggests, this project is about using github webhooks and notification  using telegram.  A webhook is a passive way for an application to communicate with another one.   The app that is meant to receive the notification will expose a web endpoint, the app initiating the communication will post data to that endpoint in a format specified by the receiver, optionally with authentication and/or authorization.  Once the notification is received the receiver can process is according to its business logic.
+
+In this case, what we are doing is make use of Github’s webhooks facility.  This allows us to receive a notification payload from github whenever a specific event occurs to a repo or organization that we own.  In our case, we want to get notified whenever a push happens to one of our repos. Github will send a json payload with a lot of information about the push - including repo details, push and commit details etc.  What we intend to do after receiving the payload is to extract some key information from the payload and send it as a telegram message to the repo owner.
+
+### High level solution
+
+The objective is to notify a user via Telgram whenever he/she pushes some commits to a github repo.  The entire workflow is as follows:
+
+* The user pushes some changes to a github repo
+* Push will trigger a webhook call
+* Github will post the corresponding payload to the Openshift function endpoint
+* The function will process the payload and post it to the telegram bot API
+* The bot will send an instant message to the user about the push.
+
+This entire workflow usually finishes in seconds.  In the design below, we will inspect the resources we need as well as the architecture of the solution.
+
+### Design and Architecture
+
+Implementing this would require multiple resources/services as follows:
+
+* Github
+  * A repo - public or private - that you own
+  * Configure a webhook to send payload whenever a push to this repo takes palace
+* Telegram
+  * Create a bot with your account
+  * Obtain an auth token and your account’s chat id
+* Serverless
+  * A “knative serving” application that exposes an endpoint.  This will be the webhook endpoint that will be configured in github.
+  * When a payload is received, the app parses the json payload and uses Telgram bot API to send a chat notification to you
+
+We will chose Redhat Openshift as our serverless platform.  Openshift is the managed Kubernetes offering and is used by large enterprises.   Openshift has adopted Knative as its serverless offering on top of Openshift.  Redhat calls their managed serverless offering as Openshift functions.  These what we wil using to run our webhook - written in python.
+
+### Architecture Diagram
+
+![Architecture Diagram](images/chapter-7-arch.jpg)
+
+## Setup Instructions
 
 Before we start with this, you need to configure you openshift account and setup the telgram bot.  Follow the instructions below.
 
@@ -56,7 +96,7 @@ safeer@serverless102:~/ghwebhook$ echo "requests" >> requirements.txt
 Replace the stock func.py with the code provided in this repo
 
 ```
-safeer@serverless102:~/ghwebhook$ wget https://raw.githubusercontent.com/PacktPublishing/Architecting-Serverless-Solutions-for-Enterprise/main/chapter-7/pywebhook/func.py -O /tmp/func.py --quiet
+safeer@serverless102:~/ghwebhook$ wget https://raw.githubusercontent.com/PacktPublishing/Architecting-Cloud-Native-Serverless-Solutions/main/chapter-7/pywebhook/func.py -O /tmp/func.py --quiet
 safeer@serverless102:~/ghwebhook$ cp /tmp/func.py func.py
 ```
 
