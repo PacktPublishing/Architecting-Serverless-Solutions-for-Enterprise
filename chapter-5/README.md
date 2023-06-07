@@ -103,7 +103,8 @@ DBINSTANCE=${PROJECT_ID}-spanner-in
 DBNAME=${PROJECT_ID}-spdb
 TABLE="Owner"
 
-gcloud spanner instances create ${DBINSTANCE} --config=regional-us-central1  --description="Spanner Instance" --nodes=1
+gcloud spanner instances create ${DBINSTANCE} --config=regional-${GCP_REGION} --instance-type=free-instance --description="Spanner Instance" 
+
 gcloud config set spanner/instance ${DBINSTANCE}
 gcloud spanner databases create ${DBNAME}
 ```
@@ -118,6 +119,8 @@ gcloud spanner rows insert --database=${DBNAME}  --table=${TABLE} --data=NumPlat
 gcloud spanner rows insert --database=${DBNAME}  --table=${TABLE} --data=NumPlate=CCC444,Name='Jane Doe',Email='janedoe@nodomain.com',Phone=9112345678
 
 ```
+
+gcloud projects delete
 
 ### Deploy the cloud run service
 
@@ -185,4 +188,13 @@ gs://packt-serverless201-xyz-speedingticket/CCC444.pdf
 gs://packt-serverless201-xyz-speedingticket/MH12DE1433.pdf
 ```
 
-You can download these PDFs from the cloud console to veiw them.  If you run into problems, use Log Explorer service to view logs and see what errors are showing up.
+You can download these PDFs from the cloud console to veiw them.  If you run into problems, use Log Explorer service to view logs and see what errors are showing up.  If you quickly wanna see how they look, checkout the [tickets](tickets) dirctory and compare them against the numberplate images under [plate-images](plate-images) directory
+
+### Delete the project 
+
+Deleteing a GCP project will delete all the resources under it.  Use the following command to cleanup everything that you created
+
+```
+gcloud spanner instances delete ${DBINSTANCE}
+gcloud projects delete ${PROJECT_ID}
+```
